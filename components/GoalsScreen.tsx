@@ -10,7 +10,7 @@ import {
     View,
     ViewStyle
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+// import { LinearGradient } from 'expo-linear-gradient';
 
 const { width, height } = Dimensions.get('window');
 
@@ -73,13 +73,9 @@ export default function GoalsScreen({ onContinue }: GoalsScreenProps) {
     return (
         <View style={styles.container}>
             <StatusBar style="dark" />
-            
+
             {/* Gradient Background */}
-            <LinearGradient
-                colors={['#E8F4EA', '#D4E7D8', '#E0E7E2']}
-                locations={[0, 0.5, 1]}
-                style={styles.gradientBackground}
-            />
+            <View style={styles.gradientBackground} />
 
             <ScrollView
                 contentContainerStyle={styles.scrollContent}
@@ -145,6 +141,7 @@ const styles = StyleSheet.create({
         right: 0,
         top: 0,
         bottom: 0,
+        backgroundColor: '#E0E7E2',
     } as ViewStyle,
     scrollContent: {
         flexGrow: 1,
