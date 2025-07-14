@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#89B697',
     },
     appName: {
-        fontFamily: 'SpaceMono', // Using available font, ideally would be Squada One
+        fontFamily: 'SquadaOne_400Regular',
         fontSize: 34,
         fontWeight: '400',
         color: '#000000',
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
         lineHeight: 50,
     },
     subtitle: {
-        fontFamily: 'SpaceMono',
+        fontFamily: 'SF Pro',
         fontSize: 18,
         fontWeight: '300',
         color: '#000000',
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
         elevation: 4,
     },
     getStartedText: {
-        fontFamily: 'SpaceMono',
+        fontFamily: 'SF Pro',
         fontSize: 20,
         fontWeight: '600',
         color: '#000000',
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
         elevation: 4,
     },
     logInText: {
-        fontFamily: 'SpaceMono',
+        fontFamily: 'SF Pro',
         fontSize: 20,
         fontWeight: '600',
         color: '#000000',

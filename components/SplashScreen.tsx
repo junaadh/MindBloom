@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#89B697',
     },
     appName: {
-        fontFamily: 'SpaceMono',
+        fontFamily: 'SquadaOne_400Regular',
         fontSize: 34,
         fontWeight: '400',
         color: '#000000',
