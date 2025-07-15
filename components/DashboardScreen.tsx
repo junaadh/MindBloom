@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import MeditationModal from "./MeditationModal";
+import MeditationPlayer from "./MeditationPlayer";
 import {
   ScrollView,
   StyleSheet,
@@ -21,39 +23,11 @@ interface DashboardScreenProps {
 
 // Dummy mood data matching Figma design - multiple values per day for smooth curve
 // Get current month and generate month labels
-const getCurrentMonthData = () => {
-  const currentDate = new Date();
-  const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-  const monthlyData = [];
-
-  for (let i = 6; i >= 0; i--) {
-    const date = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth() - i,
-      1,
-    );
-    const monthLabel = months[date.getMonth()];
-    monthlyData.push({ label: monthLabel, values: [] });
-  }
-
-  return monthlyData;
-};
 
 // Dummy mood data matching Figma design - multiple values per day
-const weeklyMoodData = [
+type MoodData = { label: string; values: number[] };
+
+const weeklyMoodData: MoodData[] = [
   { label: "Mon", values: [7.2, 7.4, 7.6, 7.3] },
   { label: "Tue", values: [7.0, 6.8, 6.5, 6.9] },
   { label: "Wed", values: [6.8, 7.0, 7.2, 7.1] },
@@ -64,7 +38,7 @@ const weeklyMoodData = [
 ];
 
 // Monthly mood data - 7 months before current month
-const monthlyMoodData = [
+const monthlyMoodData: MoodData[] = [
   { label: "Jun", values: [6.8, 7.0, 7.2, 7.1, 6.9] },
   { label: "Jul", values: [7.1, 7.3, 7.5, 7.2, 7.4] },
   { label: "Aug", values: [6.9, 7.1, 7.3, 7.0, 7.2] },
@@ -75,14 +49,14 @@ const monthlyMoodData = [
 ];
 
 // Calculate average for dynamic display
-const calculateAverage = (data: typeof moodData) => {
+const calculateAverage = (data: MoodData[]) => {
   const allValues = data.flatMap((item) => item.values);
-  const sum = allValues.reduce((acc, value) => acc + value, 0);
+  const sum = allValues.reduce((acc: number, value: number) => acc + value, 0);
   return (sum / allValues.length).toFixed(1);
 };
 
 // Create smooth curve points using interpolation
-const createSmoothCurve = (points: Array<{ x: number; y: number }>) => {
+const createSmoothCurve = (points: { x: number; y: number }[]) => {
   if (points.length < 2) return [];
 
   const smoothPoints = [];
@@ -122,12 +96,15 @@ const createSmoothCurve = (points: Array<{ x: number; y: number }>) => {
 };
 
 // Calculate percentage change (comparing last 3 days vs first 3 days)
-const calculatePercentageChange = (data: typeof moodData) => {
+const calculatePercentageChange = (data: MoodData[]) => {
   const firstHalf = data.slice(0, 3).flatMap((item) => item.values);
   const lastHalf = data.slice(-3).flatMap((item) => item.values);
   const firstAvg =
-    firstHalf.reduce((acc, val) => acc + val, 0) / firstHalf.length;
-  const lastAvg = lastHalf.reduce((acc, val) => acc + val, 0) / lastHalf.length;
+    firstHalf.reduce((acc: number, val: number) => acc + val, 0) /
+    firstHalf.length;
+  const lastAvg =
+    lastHalf.reduce((acc: number, val: number) => acc + val, 0) /
+    lastHalf.length;
   return (((lastAvg - firstAvg) / firstAvg) * 100).toFixed(1);
 };
 
@@ -137,6 +114,11 @@ export default function DashboardScreen({ onTabPress }: DashboardScreenProps) {
     "weekly",
   );
   const [slideAnimation] = useState(new Animated.Value(0));
+  const [showMeditationModal, setShowMeditationModal] = useState(false);
+  const [showMeditationPlayer, setShowMeditationPlayer] = useState(false);
+  const [meditationMinutes, setMeditationMinutes] = useState<number | null>(
+    null,
+  );
 
   // Get current data based on selected period
   const getCurrentData = () => {
@@ -157,14 +139,54 @@ export default function DashboardScreen({ onTabPress }: DashboardScreenProps) {
     onTabPress?.(tab);
   };
 
+  const handleStartMeditation = () => {
+    setShowMeditationModal(true);
+  };
+
+  const handleMeditationStart = (duration: number) => {
+    setShowMeditationModal(false);
+    setMeditationMinutes(duration);
+    setShowMeditationPlayer(true);
+  };
+
+  const handleMeditationPlayerBack = () => {
+    setShowMeditationPlayer(false);
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
+
+      <MeditationModal
+        visible={showMeditationModal}
+        onClose={() => setShowMeditationModal(false)}
+        onStart={handleMeditationStart}
+      />
+
+      {showMeditationPlayer && (
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 100,
+          }}
+        >
+          {/* Modal-like overlay for MeditationPlayer */}
+          <MeditationPlayer
+            onBack={handleMeditationPlayerBack}
+            minutes={meditationMinutes ?? 1}
+          />
+        </View>
+      )}
 
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        scrollEnabled={!showMeditationModal}
       >
         {/* Today Header */}
         <View style={styles.todayHeader}>
@@ -250,12 +272,12 @@ export default function DashboardScreen({ onTabPress }: DashboardScreenProps) {
           <View style={styles.moodGraphContainer}>
             <LinearGradient
               colors={["transparent", "transparent"]}
-              style={styles.graphGradient}
+              style={{ width: 358, height: 148, borderRadius: 8 }}
             />
             <View style={styles.graphOverlay}>
               {/* Smooth curve with gradient fill */}
               {(() => {
-                const points: Array<{ x: number; y: number }> = [];
+                const points: { x: number; y: number }[] = [];
                 const currentData = getCurrentData();
 
                 currentData.forEach((period, periodIndex) => {
@@ -300,7 +322,7 @@ export default function DashboardScreen({ onTabPress }: DashboardScreenProps) {
 
                         return (
                           <View
-                            key={`area-${i}`}
+                            key={"area-" + i}
                             style={styles.triangleContainer}
                           >
                             {/* Bottom rectangle */}
@@ -391,7 +413,7 @@ export default function DashboardScreen({ onTabPress }: DashboardScreenProps) {
         <View style={styles.calmCard}>
           <Image
             source={require("../assets/images/calm_card.png")}
-            style={styles.calmImagePlaceholder}
+            style={styles.calmImagePlaceholder as any}
             resizeMode="cover"
           />
           <Text style={styles.calmTitle}>You seem calmer this week</Text>
@@ -410,7 +432,7 @@ export default function DashboardScreen({ onTabPress }: DashboardScreenProps) {
           <View style={styles.journalIconContainer}>
             <Image
               source={require("../assets/images/journal_icon_main.png")}
-              style={styles.journalIcon}
+              style={styles.journalIcon as any}
               resizeMode="contain"
             />
           </View>
@@ -420,7 +442,7 @@ export default function DashboardScreen({ onTabPress }: DashboardScreenProps) {
           </View>
           <Image
             source={require("../assets/images/journal_icon_arrow.png")}
-            style={styles.journalArrow}
+            style={styles.journalArrow as any}
             resizeMode="contain"
           />
         </View>
@@ -439,7 +461,11 @@ export default function DashboardScreen({ onTabPress }: DashboardScreenProps) {
               <Text style={styles.actionDescription}>
                 Take a moment to pause and breathe.
               </Text>
-              <TouchableOpacity style={styles.actionButton}>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={handleStartMeditation}
+                disabled={showMeditationModal}
+              >
                 <Text style={styles.actionButtonText}>Start meditation</Text>
               </TouchableOpacity>
             </View>
@@ -453,7 +479,9 @@ export default function DashboardScreen({ onTabPress }: DashboardScreenProps) {
                 Track your emotional well-being over time.
               </Text>
               <TouchableOpacity style={styles.actionButton}>
-                <Text style={styles.actionButtonText}>View today's mood</Text>
+                <Text style={styles.actionButtonText}>
+                  View today&apos;s mood
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -498,9 +526,11 @@ export default function DashboardScreen({ onTabPress }: DashboardScreenProps) {
       </ScrollView>
 
       {/* Fixed TaskBar */}
-      <View style={styles.taskBarContainer}>
-        <TaskBar activeTab={activeTab} onTabPress={handleTabPress} />
-      </View>
+      {!showMeditationModal && !showMeditationPlayer && (
+        <View style={styles.taskBarContainer}>
+          <TaskBar activeTab={activeTab} onTabPress={handleTabPress} />
+        </View>
+      )}
     </View>
   );
 }
@@ -511,12 +541,26 @@ const styles = StyleSheet.create({
     backgroundColor: "#E0E7E2",
   } as ViewStyle,
 
+  actionContentFlex: {
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "flex-start",
+    flex: 1,
+    width: "100%",
+  } as ViewStyle,
+
+  graphGradient: {
+    width: 358,
+    height: 148,
+    borderRadius: 8,
+  } as ViewStyle,
+
   scrollView: {
     flex: 1,
   } as ViewStyle,
 
   scrollContent: {
-    paddingBottom: 120,
+    paddingBottom: 69,
   } as ViewStyle,
 
   todayHeader: {
@@ -896,7 +940,6 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     paddingHorizontal: 24,
     paddingVertical: 10,
-    height: 112,
   } as ViewStyle,
 
   moodCheckCard: {
@@ -916,7 +959,6 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     paddingHorizontal: 24,
     paddingVertical: 10,
-    height: 112,
   } as ViewStyle,
 
   habitsCard: {

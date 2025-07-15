@@ -1,8 +1,6 @@
-import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import {
-  Dimensions,
   StyleSheet,
   Text,
   TextStyle,
@@ -10,7 +8,7 @@ import {
   View,
   ViewStyle,
 } from "react-native";
-import { PanGestureHandler, State } from "react-native-gesture-handler";
+import { PanGestureHandler } from "react-native-gesture-handler";
 import Animated, {
   useAnimatedGestureHandler,
   useAnimatedStyle,
@@ -21,8 +19,6 @@ import Animated, {
   withSequence,
   interpolateColor,
 } from "react-native-reanimated";
-
-const { width } = Dimensions.get("window");
 
 interface MoodBarScreenProps {
   onContinue?: (mood: string) => void;
@@ -82,7 +78,7 @@ export default function MoodBarScreen({ onContinue }: MoodBarScreenProps) {
       -1,
       true,
     );
-  }, []);
+  }, [pulseAnimation]);
 
   const animatedSliderStyle = useAnimatedStyle(() => {
     const currentColor = interpolateColor(
@@ -103,10 +99,10 @@ export default function MoodBarScreen({ onContinue }: MoodBarScreenProps) {
   });
 
   const gestureHandler = useAnimatedGestureHandler({
-    onStart: (_, context) => {
+    onStart: (_: any, context: { startX: number }) => {
       context.startX = translateX.value;
     },
-    onActive: (event, context) => {
+    onActive: (event: any, context: { startX: number }) => {
       const newX = context.startX + event.translationX;
       const clampedX = Math.max(0, Math.min(324, newX)); // Clamp between 0 and 324
       translateX.value = clampedX;
@@ -122,10 +118,6 @@ export default function MoodBarScreen({ onContinue }: MoodBarScreenProps) {
       transform: [{ translateX: translateX.value }],
     };
   });
-
-  const getCurrentMoodColor = () => {
-    return MOOD_COLORS[currentMood];
-  };
 
   // Animated styles for smooth color transitions
   const animatedLogoStyle = useAnimatedStyle(() => {
