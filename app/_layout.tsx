@@ -26,6 +26,7 @@ export default function RootLayout() {
         <Stack.Screen name="ai-guide" options={{ headerShown: false }} />
         <Stack.Screen name="mood-bar" options={{ headerShown: false }} />
         <Stack.Screen name="dashboard" options={{ headerShown: false }} />
+        <Stack.Screen name="journal" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>
     </GestureHandlerRootView>

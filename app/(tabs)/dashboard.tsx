@@ -18,8 +18,7 @@ export default function Dashboard() {
         console.log("Navigate to explore");
         break;
       case "journal":
-        // TODO: Navigate to journal screen
-        console.log("Navigate to journal");
+        router.push("/journal");
         break;
       case "profile":
         // TODO: Navigate to profile screen

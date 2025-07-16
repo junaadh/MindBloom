@@ -10,15 +10,18 @@ import {
   StyleSheet,
   Image,
 } from "react-native";
-import AddHabitModal from "./AddHabitModal";
-import HabitModal from "./HabitModal";
 import MeditationModal from "./MeditationModal";
 import MeditationPlayer from "./MeditationPlayer";
 import TaskBar, { TabType } from "./TaskBar";
 import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
+import HabitModal from "./HabitModal";
+import AddHabitModal from "./AddHabitModal";
 import HabitListModal from "./HabitList";
+import GoalModal from "./GoalModal";
+import AddGoalModal from "./AddGoalModal";
+import GoalListModal from "./GoalList";
 
 interface DashboardScreenProps {
   onTabPress?: (tab: TabType) => void;
@@ -133,6 +136,12 @@ export default function DashboardScreen({
   const [showHabitListModal, setShowHabitListModal] = useState(false);
   const [shouldOpenHabitList, setShouldOpenHabitList] = useState(false);
 
+  const [showGoalModal, setShowGoalModal] = useState(false);
+  const [showAddGoalModal, setShowAddGoalModal] = useState(false);
+  const [shouldOpenAddGoal, setShouldOpenAddGoal] = useState(false);
+  const [showGoalListModal, setShowGoalListModal] = useState(false);
+  const [shouldOpenGoalList, setShouldOpenGoalList] = useState(false);
+
   // Get current data based on selected period
   const getCurrentData = () => {
     return selectedPeriod === "weekly" ? weeklyMoodData : monthlyMoodData;
@@ -165,13 +174,6 @@ export default function DashboardScreen({
   const handleMeditationPlayerBack = () => {
     setShowMeditationPlayer(false);
   };
-
-  useEffect(() => {
-    return () => {
-      setShowAddHabitModal(false); // Ensure it resets
-      setShowHabitModal(false);
-    };
-  }, []);
 
   return (
     <View style={styles.container}>
@@ -250,6 +252,56 @@ export default function DashboardScreen({
       <HabitListModal
         visible={showHabitListModal}
         onClose={() => setShowHabitListModal(false)}
+      />
+
+      {/* Goal Modal */}
+      <GoalModal
+        visible={showGoalModal}
+        onClose={() => {
+          setShowGoalModal(false);
+        }}
+        onAfterClose={() => {
+          if (shouldOpenAddGoal) {
+            setShowAddGoalModal(true);
+            console.log("Add Goal Modal opened");
+            setShouldOpenAddGoal(false);
+          } else if (shouldOpenGoalList) {
+            setShowGoalListModal(true);
+            console.log("Goal List Modal opened");
+            setShouldOpenGoalList(false);
+          }
+        }}
+        onAddGoal={() => {
+          setShouldOpenAddGoal(true);
+          setShowGoalModal(false);
+        }}
+        onCheckGoals={() => {
+          setShouldOpenGoalList(true);
+          setShowGoalModal(false);
+        }}
+      />
+
+      {/* Add Goal Modal */}
+      <AddGoalModal
+        visible={showAddGoalModal}
+        onClose={() => setShowAddGoalModal(false)}
+        onAfterClose={() => {
+          if (shouldOpenGoalList) {
+            setShowGoalListModal(true);
+            setShouldOpenGoalList(false);
+          }
+        }}
+        onSave={(_) => {
+          console.log("Goal added");
+          setShouldOpenGoalList(true);
+          setShowAddGoalModal(false);
+        }}
+      />
+
+      {/* Goal List Modal */}
+      <GoalListModal
+        visible={showGoalListModal}
+        onClose={() => setShowGoalListModal(false)}
       />
 
       <ScrollView
@@ -589,7 +641,10 @@ export default function DashboardScreen({
                 Keep track and grow at your pace.
               </Text>
               <Text style={styles.goalStreak}>7 day streak</Text>
-              <TouchableOpacity style={styles.actionButton}>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() => setShowGoalModal(true)}
+              >
                 <Text style={styles.actionButtonText}>Manage goals</Text>
               </TouchableOpacity>
             </View>
