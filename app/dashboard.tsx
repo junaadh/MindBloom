@@ -1,9 +1,11 @@
 import DashboardScreen from "@/components/DashboardScreen";
-
 import React from "react";
 import { TabType } from "@/components/TaskBar";
+import { useRouter } from "expo-router";
 
 export default function Dashboard() {
+  const router = useRouter();
+
   const handleTabPress = (tab: TabType) => {
     console.log("Tab pressed:", tab);
 
@@ -26,5 +28,5 @@ export default function Dashboard() {
     }
   };
 
-  return <DashboardScreen onTabPress={handleTabPress} />;
+  return <DashboardScreen onTabPress={handleTabPress} router={router} />;
 }

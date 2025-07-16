@@ -1,24 +1,28 @@
-import React, { useState } from "react";
-import MeditationModal from "./MeditationModal";
-import MeditationPlayer from "./MeditationPlayer";
+import React, { useEffect, useState } from "react";
 import {
+  View,
+  Text,
+  TouchableOpacity,
+  Animated,
+  TextStyle,
+  ViewStyle,
   ScrollView,
   StyleSheet,
-  Text,
-  TextStyle,
-  TouchableOpacity,
-  View,
-  ViewStyle,
-  Animated,
   Image,
 } from "react-native";
+import AddHabitModal from "./AddHabitModal";
+import HabitModal from "./HabitModal";
+import MeditationModal from "./MeditationModal";
+import MeditationPlayer from "./MeditationPlayer";
+import TaskBar, { TabType } from "./TaskBar";
 import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
-import TaskBar, { TabType } from "./TaskBar";
 import { Ionicons } from "@expo/vector-icons";
+import HabitListModal from "./HabitList";
 
 interface DashboardScreenProps {
   onTabPress?: (tab: TabType) => void;
+  router?: any; // If using expo-router
 }
 
 // Dummy mood data matching Figma design - multiple values per day for smooth curve
@@ -108,17 +112,26 @@ const calculatePercentageChange = (data: MoodData[]) => {
   return (((lastAvg - firstAvg) / firstAvg) * 100).toFixed(1);
 };
 
-export default function DashboardScreen({ onTabPress }: DashboardScreenProps) {
+export default function DashboardScreen({
+  onTabPress,
+  router,
+}: DashboardScreenProps) {
   const [activeTab, setActiveTab] = useState<TabType>("home");
   const [selectedPeriod, setSelectedPeriod] = useState<"weekly" | "monthly">(
-    "weekly",
+    "weekly"
   );
   const [slideAnimation] = useState(new Animated.Value(0));
   const [showMeditationModal, setShowMeditationModal] = useState(false);
   const [showMeditationPlayer, setShowMeditationPlayer] = useState(false);
   const [meditationMinutes, setMeditationMinutes] = useState<number | null>(
-    null,
+    null
   );
+  // Use two booleans for modal visibility
+  const [showHabitModal, setShowHabitModal] = useState(false);
+  const [showAddHabitModal, setShowAddHabitModal] = useState(false);
+  const [shouldOpenAddHabit, setShouldOpenAddHabit] = useState(false);
+  const [showHabitListModal, setShowHabitListModal] = useState(false);
+  const [shouldOpenHabitList, setShouldOpenHabitList] = useState(false);
 
   // Get current data based on selected period
   const getCurrentData = () => {
@@ -153,6 +166,13 @@ export default function DashboardScreen({ onTabPress }: DashboardScreenProps) {
     setShowMeditationPlayer(false);
   };
 
+  useEffect(() => {
+    return () => {
+      setShowAddHabitModal(false); // Ensure it resets
+      setShowHabitModal(false);
+    };
+  }, []);
+
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
@@ -181,6 +201,56 @@ export default function DashboardScreen({ onTabPress }: DashboardScreenProps) {
           />
         </View>
       )}
+
+      {/* Habit Modal */}
+      <HabitModal
+        visible={showHabitModal}
+        onClose={() => {
+          setShowHabitModal(false);
+        }}
+        onAfterClose={() => {
+          if (shouldOpenAddHabit) {
+            setShowAddHabitModal(true);
+            console.log("Add Habit Modal opened");
+            setShouldOpenAddHabit(false);
+          } else if (shouldOpenHabitList) {
+            setShowHabitListModal(true);
+            console.log("Habit List Modal opened");
+            setShouldOpenHabitList(false);
+          }
+        }}
+        onAddHabit={() => {
+          setShouldOpenAddHabit(true);
+          setShowHabitModal(false);
+        }}
+        onCheckHabits={() => {
+          setShouldOpenHabitList(true);
+          setShowHabitModal(false);
+        }}
+      />
+
+      {/* Add Habit Modal */}
+      <AddHabitModal
+        visible={showAddHabitModal}
+        onClose={() => setShowAddHabitModal(false)}
+        onAfterClose={() => {
+          if (shouldOpenHabitList) {
+            setShowHabitListModal(true);
+            setShouldOpenHabitList(false);
+          }
+        }}
+        onSave={(_) => {
+          console.log("Habit added");
+          setShouldOpenHabitList(true);
+          setShowAddHabitModal(false);
+        }}
+      />
+
+      {/* Habit List Modal */}
+      <HabitListModal
+        visible={showHabitListModal}
+        onClose={() => setShowHabitListModal(false)}
+      />
 
       <ScrollView
         style={styles.scrollView}
@@ -317,7 +387,7 @@ export default function DashboardScreen({ onTabPress }: DashboardScreenProps) {
                         const width = nextPoint.x - point.x;
                         const fillBaseY = Math.max(
                           baselineY,
-                          Math.max(point.y, nextPoint.y),
+                          Math.max(point.y, nextPoint.y)
                         );
 
                         return (
@@ -364,12 +434,12 @@ export default function DashboardScreen({ onTabPress }: DashboardScreenProps) {
                       const nextPoint = smoothPoints[i + 1];
                       const length = Math.sqrt(
                         (nextPoint.x - point.x) ** 2 +
-                          (nextPoint.y - point.y) ** 2,
+                          (nextPoint.y - point.y) ** 2
                       );
                       const angle =
                         Math.atan2(
                           nextPoint.y - point.y,
-                          nextPoint.x - point.x,
+                          nextPoint.x - point.x
                         ) *
                         (180 / Math.PI);
 
@@ -478,7 +548,14 @@ export default function DashboardScreen({ onTabPress }: DashboardScreenProps) {
               <Text style={styles.actionDescription}>
                 Track your emotional well-being over time.
               </Text>
-              <TouchableOpacity style={styles.actionButton}>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() => {
+                  if (router) {
+                    router.push("/mood-bar");
+                  }
+                }}
+              >
                 <Text style={styles.actionButtonText}>
                   View today&apos;s mood
                 </Text>
@@ -494,7 +571,10 @@ export default function DashboardScreen({ onTabPress }: DashboardScreenProps) {
                 Build routines that support your well-being. Add new habits and
                 track your progress every day.
               </Text>
-              <TouchableOpacity style={styles.actionButton}>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() => setShowHabitModal(true)}
+              >
                 <Text style={styles.actionButtonText}>Manage habits</Text>
               </TouchableOpacity>
             </View>
@@ -575,6 +655,20 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#000000",
     lineHeight: 37,
+  } as TextStyle,
+  viewMoodButton: {
+    backgroundColor: "#ECECEC",
+    borderRadius: 100,
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    marginTop: 8,
+    alignSelf: "flex-end",
+  } as ViewStyle,
+  viewMoodButtonText: {
+    fontFamily: "SF Pro",
+    fontSize: 16,
+    color: "#63877D",
+    fontWeight: "700",
   } as TextStyle,
 
   timePeriodSelector: {

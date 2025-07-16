@@ -80,13 +80,6 @@ export default function MeditationPlayer({
     }
   }, [phaseSeconds, phase, totalSeconds]);
 
-  // Format total time as MM:SS
-  const formatTime = (secs: number) => {
-    const m = Math.floor(secs / 60);
-    const s = secs % 60;
-    return `${m}:${s.toString().padStart(2, "0")}`;
-  };
-
   const animatedLogoStyle = useAnimatedStyle(() => {
     return {
       backgroundColor: "#89B697",

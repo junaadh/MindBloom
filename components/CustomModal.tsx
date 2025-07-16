@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableWithoutFeedback,
   View,
+  ViewStyle,
 } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -16,13 +17,15 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-const { width, height } = Dimensions.get("window");
+const { height } = Dimensions.get("window");
 
 interface CustomModalProps {
   visible: boolean;
   onClose?: () => void;
+  onAfterClose?: () => void;
   children?: ReactNode;
   blurIntensity?: number;
+  style?: ViewStyle;
   blurTint?:
     | "light"
     | "dark"
@@ -36,12 +39,15 @@ interface CustomModalProps {
 export default function CustomModal({
   visible,
   onClose,
+  onAfterClose,
   children,
-  blurIntensity = 50,
+  blurIntensity = 20,
+  style,
   blurTint = "systemUltraThinMaterialLight",
   onBackdropPress,
   onTapAnywhere,
 }: CustomModalProps) {
+  const hasMounted = React.useRef(false);
   const translateY = useSharedValue(height);
   const opacity = useSharedValue(0);
 
@@ -50,6 +56,7 @@ export default function CustomModal({
 
   useEffect(() => {
     if (visible) {
+      hasMounted.current = true;
       setInternalVisible(true);
       translateY.value = withSpring(0, { damping: 20, stiffness: 90 });
       opacity.value = withTiming(1, { duration: 300 });
@@ -57,9 +64,14 @@ export default function CustomModal({
       // Animate out, then hide modal after animation
       translateY.value = withSpring(height, { damping: 20, stiffness: 90 });
       opacity.value = withTiming(0, { duration: 300 });
-      setTimeout(() => setInternalVisible(false), 300);
+      setTimeout(() => {
+        setInternalVisible(false);
+        if (hasMounted.current && onAfterClose) {
+          onAfterClose();
+        }
+      }, 300);
     }
-  }, [visible]);
+  }, [visible, opacity, translateY, onAfterClose]);
 
   const dismissModal = () => {
     if (onClose) onClose();
@@ -107,7 +119,7 @@ export default function CustomModal({
       onRequestClose={onClose}
     >
       <TouchableWithoutFeedback onPress={handleBackdrop}>
-        <View style={styles.overlay}>
+        <View style={[styles.overlay]}>
           <Animated.View style={[styles.blurContainer, backgroundStyle]}>
             <BlurView
               intensity={blurIntensity}
@@ -116,7 +128,7 @@ export default function CustomModal({
             />
           </Animated.View>
 
-          <Animated.View style={[styles.modalContainer, animatedStyle]}>
+          <Animated.View style={[styles.modalContainer, animatedStyle, style]}>
             <TouchableWithoutFeedback onPress={handleTapInside}>
               <View style={styles.modalWrapper}>
                 <BlurView

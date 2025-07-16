@@ -2,7 +2,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
 import {
-  Dimensions,
   Image,
   StyleSheet,
   Text,
@@ -11,8 +10,6 @@ import {
   View,
   ViewStyle,
 } from "react-native";
-
-const { width } = Dimensions.get("window");
 
 interface AIGuidePageProps {
   onNext?: () => void;
