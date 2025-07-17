@@ -11,6 +11,8 @@ import {
 } from "react-native";
 import { SvgUri } from "react-native-svg";
 import { useSession } from "@/session/ctx";
+import Toggle from "./toggle";
+import { Ionicons } from "@expo/vector-icons";
 
 // Asset imports (ensure these files exist in assets/images/ProfileScreen)
 // import avatar = require("../assets/images/ProfileScreen/profile_avatar.png");
@@ -48,39 +50,52 @@ const ProfileScreen: React.FC = ({ router }: ProfileScreenProps) => {
         {/* Preferences */}
         <Text style={styles.sectionHeader}>Preferences</Text>
         <View style={styles.settingCard}>
+          <Image
+            source={require("../assets/images/sun.png")}
+            style={{ marginRight: 10 }}
+          />
           <Text style={styles.settingLabel}>Theme</Text>
           <Text style={styles.settingValue}>Light</Text>
-          <View style={styles.faceIdButton} />
-          <Text style={styles.settingIcon}>􀆭</Text>
+          <Toggle />
         </View>
         <View style={styles.settingCard}>
+          <Image
+            source={require("../assets/images/globe.png")}
+            style={{ marginRight: 10 }}
+          />
           <Text style={styles.settingLabel}>Language</Text>
           <Text style={styles.settingValue}>English</Text>
-          {/* // <SvgUri width={16} height={16} uri={languageArrow} /> */}
-          <Text style={styles.settingIcon}>􀆪</Text>
+          <Ionicons name="chevron-forward-outline" size={16} />
         </View>
         <View style={styles.settingCard}>
-          <Text style={styles.settingLabel}>Explainability Level</Text>
-          <Text style={styles.settingValue}>Medium</Text>
-          {/*// <SvgUri width={16} height={16} uri={explainabilityArrow} /> */}
-          <Text style={styles.settingIcon}>􂮢</Text>
-        </View>
-        <View style={styles.settingCard}>
-          <Text style={styles.settingLabel}>Face ID</Text>
-          <View style={styles.faceIdButton} />
-          <Text style={styles.settingIcon}>􀎽</Text>
+          <Image
+            source={require("../assets/images/bell.png")}
+            style={{ marginRight: 10 }}
+          />
+          <Text style={styles.settingLabel}>Notifications</Text>
+          <Toggle />
         </View>
 
         {/* AI Settings & Accessibility */}
         <Text style={styles.sectionHeader}>AI Settings</Text>
-        <Text style={styles.sectionHeader}>Accessibility</Text>
-
-        {/* Notifications */}
         <View style={styles.settingCard}>
-          <Text style={styles.settingLabel}>Notifications</Text>
-          {/* // <Text style={styles.settingValue}>On</Text>
-          // <SvgUri width={16} height={16} uri={notificationsToggle} />
-          // <Text style={styles.settingIcon}>􀝖</Text> */}
+          <Image
+            source={require("../assets/images/ai.png")}
+            style={{ marginRight: 10 }}
+          />
+          <Text style={styles.settingLabel}>Explainability Level</Text>
+          <Text style={styles.settingValue}>Medium</Text>
+          <Ionicons name="chevron-forward-outline" size={16} />
+        </View>
+
+        <Text style={styles.sectionHeader}>Accessibility</Text>
+        <View style={styles.settingCard}>
+          <Image
+            source={require("../assets/images/faceid.png")}
+            style={{ marginRight: 10 }}
+          />
+          <Text style={styles.settingLabel}>Face ID</Text>
+          <Toggle />
         </View>
 
         {/* Log Out Button */}
@@ -104,7 +119,6 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: 16,
-    paddingBottom: 120,
     backgroundColor: "#E0E7E2",
   },
   accountTitle: {
@@ -184,6 +198,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#000",
     textAlign: "right",
+    marginRight: 10,
   },
   settingIcon: {
     marginLeft: 12,
