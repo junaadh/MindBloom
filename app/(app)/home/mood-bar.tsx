@@ -6,7 +6,7 @@ export default function MoodBar() {
   const handleContinue = (mood: string) => {
     // TODO: Handle mood selection and navigate to next screen
     console.log("Mood selected:", mood);
-    router.push("/home");
+    router.replace("/home");
   };
 
   return <MoodBarScreen onContinue={handleContinue} />;
