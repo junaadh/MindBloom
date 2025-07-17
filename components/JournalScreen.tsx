@@ -1,3 +1,4 @@
+import { BlurView } from "expo-blur";
 import React from "react";
 import {
   View,
@@ -6,6 +7,7 @@ import {
   ScrollView,
   SafeAreaView,
   Dimensions,
+  TouchableOpacity,
 } from "react-native";
 
 const JOURNAL_ENTRIES = [
@@ -67,22 +69,27 @@ const JournalScreen: React.FC = () => {
                       <Text style={styles.cardIcon}>{entry.icon}</Text>
                     </View>
                     <View style={styles.cardContent}>
-                      <Text style={styles.cardMood}>{entry.mood}</Text>
+                      <View style={styles.cardTimeWrap}>
+                        <Text style={styles.cardMood}>{entry.mood}</Text>
+                        <Text style={styles.cardTime}>{entry.time}</Text>
+                      </View>
                       <Text style={styles.cardText}>{entry.content}</Text>
                     </View>
                   </View>
-                  <Text style={styles.cardTime}>{entry.time}</Text>
                 </View>
               ))}
             </View>
           ))}
         </ScrollView>
       </View>
+
+      <TouchableOpacity style={styles.newEntryContainer}>
+        <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
+        <Text style={styles.newEntryText}>+</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };
-
-const { width } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
   safe: {
@@ -131,6 +138,7 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
     alignItems: "flex-start",
+    justifyContent: "center",
     backgroundColor: "#ECECEC",
     borderRadius: 18,
     padding: 18,
@@ -142,7 +150,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   cardIconWrap: {
-    width: 43,
+    width: 46,
     height: 46,
     alignItems: "center",
     justifyContent: "center",
@@ -156,6 +164,10 @@ const styles = StyleSheet.create({
   cardContent: {
     flex: 1,
     justifyContent: "center",
+  },
+  cardTimeWrap: {
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   cardMood: {
     fontFamily: "SF Pro",
@@ -178,10 +190,26 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#000",
     opacity: 0.7,
-    marginLeft: 10,
-    marginTop: 12,
-    minWidth: 70,
-    textAlign: "right",
+    // marginLeft: 10,
+    // marginTop: 12,
+    // minWidth: 70,
+    // textAlign: "right",
+  },
+  newEntryContainer: {
+    position: "absolute",
+    flex: 1,
+    top: 793,
+    left: 315,
+    width: 50,
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 100,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    overflow: "hidden",
+  },
+  newEntryText: {
+    fontSize: 30,
   },
 });
 

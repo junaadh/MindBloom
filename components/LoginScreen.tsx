@@ -8,7 +8,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { PanGestureHandler } from "react-native-gesture-handler";
+import {
+  GestureHandlerRootView,
+  PanGestureHandler,
+} from "react-native-gesture-handler";
 import Animated, {
   runOnJS,
   useAnimatedGestureHandler,
@@ -44,11 +47,10 @@ export default function LoginScreen({
   const toggleOpacity = useSharedValue(0.3);
 
   const gestureHandler = useAnimatedGestureHandler({
-    onStart: (_, context) => {
-      context.startX = translateX.value;
+    onStart: (_, ctx: any) => {
+      ctx.startX = translateX.value;
     },
-    onActive: (event) => {
-      // Only allow swiping right (positive direction)
+    onActive: (event, ctx: any) => {
       if (event.translationX > 0) {
         translateX.value = event.translationX;
         opacity.value = Math.max(0.3, 1 - event.translationX / width);
@@ -56,135 +58,120 @@ export default function LoginScreen({
     },
     onEnd: (event) => {
       if (event.translationX > width * 0.3) {
-        // Swipe completed - navigate back
         translateX.value = withSpring(width);
         opacity.value = withSpring(0);
-        if (onBack) {
-          runOnJS(onBack)();
-        }
+        if (onBack) runOnJS(onBack)();
       } else {
-        // Swipe not completed - return to original position
         translateX.value = withSpring(0);
         opacity.value = withSpring(1);
       }
     },
   });
 
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ translateX: translateX.value }],
-      opacity: opacity.value,
-    };
-  });
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateX.value }],
+    opacity: opacity.value,
+  }));
 
-  const toggleAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ translateX: toggleX.value }],
-      opacity: toggleOpacity.value,
-    };
-  });
+  const toggleAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: toggleX.value }],
+    opacity: toggleOpacity.value,
+  }));
 
-  const trackAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      backgroundColor: faceIDEnabled ? "#34C759" : "#D4D4D4",
-    };
-  });
+  const trackAnimatedStyle = useAnimatedStyle(() => ({
+    backgroundColor: faceIDEnabled ? "#34C759" : "#D4D4D4",
+  }));
 
   const toggleFaceID = () => {
     const newValue = !faceIDEnabled;
     setFaceIDEnabled(newValue);
 
-    // Animate toggle position
     toggleX.value = withSpring(newValue ? 18 : 0);
     toggleOpacity.value = withSpring(newValue ? 1 : 0.3);
 
-    if (onUseFaceID) {
-      onUseFaceID();
-    }
+    if (onUseFaceID) onUseFaceID();
   };
 
   const handleLogin = () => {
-    if (onLogin) {
-      onLogin(username, password);
-    }
+    if (onLogin) onLogin(username, password);
   };
 
   return (
-    <PanGestureHandler onGestureEvent={gestureHandler}>
-      <Animated.View style={[styles.container, animatedStyle]}>
-        <StatusBar style="dark" />
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <PanGestureHandler onGestureEvent={gestureHandler}>
+        <Animated.View style={[styles.container, animatedStyle]}>
+          <StatusBar style="dark" />
 
-        {/* Header with back button */}
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={onBack}>
-            <Text style={styles.backArrow}>←</Text>
-          </TouchableOpacity>
-          <Text style={styles.title}>LogIn</Text>
-        </View>
-
-        {/* Welcome message */}
-        <Text style={styles.welcomeText}>Welcome back!</Text>
-
-        {/* Input fields */}
-        <View style={styles.inputContainer}>
-          <View style={styles.inputField}>
-            <TextInput
-              style={styles.input}
-              placeholder="Username"
-              placeholderTextColor="#808080"
-              value={username}
-              onChangeText={setUsername}
-              autoCapitalize="none"
-            />
+          <View style={styles.header}>
+            <TouchableOpacity style={styles.backButton} onPress={onBack}>
+              <Text style={styles.backArrow}>←</Text>
+            </TouchableOpacity>
+            <Text style={styles.title}>LogIn</Text>
           </View>
 
-          <View style={styles.inputField}>
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              placeholderTextColor="#808080"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
-          </View>
-        </View>
+          <Text style={styles.welcomeText}>Welcome back!</Text>
 
-        {/* Face ID and Forgot Password */}
-        <View style={styles.optionsContainer}>
-          <TouchableOpacity style={styles.faceIDButton} onPress={toggleFaceID}>
-            <Animated.View style={[styles.faceIDIcon, trackAnimatedStyle]}>
-              <Animated.View
-                style={[styles.faceIDInner, toggleAnimatedStyle]}
+          <View style={styles.inputContainer}>
+            <View style={styles.inputField}>
+              <TextInput
+                style={styles.input}
+                placeholder="Username"
+                placeholderTextColor="#808080"
+                value={username}
+                onChangeText={setUsername}
+                autoCapitalize="none"
               />
-            </Animated.View>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={toggleFaceID}>
-            <Text style={styles.faceIDText}>Use Face ID</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={onForgotPassword}>
-            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-          </TouchableOpacity>
-        </View>
+            </View>
 
-        {/* Login button */}
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-          <Text style={styles.loginButtonText}>Log In</Text>
-        </TouchableOpacity>
+            <View style={styles.inputField}>
+              <TextInput
+                style={styles.input}
+                placeholder="Password"
+                placeholderTextColor="#808080"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+              />
+            </View>
+          </View>
 
-        {/* Sign up */}
-        <View style={styles.signUpContainer}>
-          <Text style={styles.signUpText}>Don&apos;t have an account? </Text>
-          <TouchableOpacity onPress={onSignUp}>
-            <Text style={styles.signUpLink}>Sign Up</Text>
+          <View style={styles.optionsContainer}>
+            <TouchableOpacity
+              style={styles.faceIDButton}
+              onPress={toggleFaceID}
+            >
+              <Animated.View style={[styles.faceIDIcon, trackAnimatedStyle]}>
+                <Animated.View
+                  style={[styles.faceIDInner, toggleAnimatedStyle]}
+                />
+              </Animated.View>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={toggleFaceID}>
+              <Text style={styles.faceIDText}>Use Face ID</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={onForgotPassword}>
+              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+            <Text style={styles.loginButtonText}>Log In</Text>
           </TouchableOpacity>
-        </View>
-      </Animated.View>
-    </PanGestureHandler>
+
+          <View style={styles.signUpContainer}>
+            <Text style={styles.signUpText}>Don&apos;t have an account? </Text>
+            <TouchableOpacity onPress={onSignUp}>
+              <Text style={styles.signUpLink}>Sign Up</Text>
+            </TouchableOpacity>
+          </View>
+        </Animated.View>
+      </PanGestureHandler>
+    </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
+  // ... same styles you already wrote
   container: {
     flex: 1,
     backgroundColor: "#E0E7E2",

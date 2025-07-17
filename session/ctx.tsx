@@ -1,5 +1,6 @@
 import { createContext, PropsWithChildren, use, useCallback } from "react";
 import { useStorageState } from "@/session/useStorageState";
+import { router } from "expo-router";
 
 interface SessionData {
   email: string;
@@ -29,7 +30,16 @@ export function useSession(): AuthContextType {
 export function SessionProvider({ children }: PropsWithChildren) {
   const [[isLoading, sessionString], setSessionString] =
     useStorageState("session");
-  const session = sessionString ? JSON.parse(sessionString) : null;
+  const session =
+    sessionString &&
+    (() => {
+      try {
+        const parsed = JSON.parse(sessionString);
+        return parsed.email && parsed.password ? parsed : null;
+      } catch {
+        return null;
+      }
+    })();
 
   const signup = useCallback(
     (email: string, password: string) => {
@@ -49,6 +59,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
 
   const logout = useCallback(() => {
     setSessionString(null);
+    router.replace("/");
   }, [setSessionString]);
 
   return (

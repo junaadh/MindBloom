@@ -376,7 +376,7 @@ const styles = StyleSheet.create({
   } as TextStyle,
   continueButton: {
     position: "absolute",
-    top: 847,
+    top: 800,
     left: 36,
     width: 367,
     height: 62,

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import Animated, {
   withSpring,
   useAnimatedStyle,
 } from "react-native-reanimated";
+import { useFocusEffect, useNavigation } from "expo-router";
 
 interface MeditationPlayerProps {
   onBack?: () => void;
@@ -23,6 +24,14 @@ interface MeditationPlayerProps {
   onStop?: () => void;
   minutes?: number; // total meditation time in minutes
 }
+
+export const unstable_settings = {
+  initialRouteName: "new-entry",
+};
+
+export const screenOptions = {
+  tabBarStyle: { display: "none" },
+};
 
 export default function MeditationPlayer({
   onBack,
@@ -323,7 +332,7 @@ const styles = StyleSheet.create({
   },
   controlsRow: {
     position: "absolute",
-    top: 803,
+    top: 780,
     left: 36,
     width: 367,
     height: 71,

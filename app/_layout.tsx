@@ -2,8 +2,9 @@ import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { SquadaOne_400Regular } from "@expo-google-fonts/squada-one";
 import "react-native-reanimated";
-import { SessionProvider } from "../session/ctx";
-import SplashScreenController from "./splash";
+import { SessionProvider, useSession } from "../session/ctx";
+import SplashScreenController from "../splash";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function Root() {
   const [loaded] = useFonts({
@@ -16,13 +17,31 @@ export default function Root() {
   }
 
   return (
-    <SessionProvider>
-      <SplashScreenController />
-      <RootNavigator />
-    </SessionProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SessionProvider>
+        <SplashScreenController />
+        <RootNavigator />
+      </SessionProvider>
+    </GestureHandlerRootView>
   );
 }
 
 function RootNavigator() {
-  return <Stack />;
+  const { session } = useSession();
+
+  console.log("Session in RootNavigator:", session);
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <Stack.Protected guard={session === null}>
+        <Stack.Screen name="(auth)" />
+      </Stack.Protected>
+      <Stack.Protected guard={session !== null}>
+        <Stack.Screen name="(app)" />
+      </Stack.Protected>
+    </Stack>
+  );
 }

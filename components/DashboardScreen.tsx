@@ -121,13 +121,13 @@ export default function DashboardScreen({
 }: DashboardScreenProps) {
   const [activeTab, setActiveTab] = useState<TabType>("home");
   const [selectedPeriod, setSelectedPeriod] = useState<"weekly" | "monthly">(
-    "weekly"
+    "weekly",
   );
   const [slideAnimation] = useState(new Animated.Value(0));
   const [showMeditationModal, setShowMeditationModal] = useState(false);
   const [showMeditationPlayer, setShowMeditationPlayer] = useState(false);
   const [meditationMinutes, setMeditationMinutes] = useState<number | null>(
-    null
+    null,
   );
   // Use two booleans for modal visibility
   const [showHabitModal, setShowHabitModal] = useState(false);
@@ -439,7 +439,7 @@ export default function DashboardScreen({
                         const width = nextPoint.x - point.x;
                         const fillBaseY = Math.max(
                           baselineY,
-                          Math.max(point.y, nextPoint.y)
+                          Math.max(point.y, nextPoint.y),
                         );
 
                         return (
@@ -486,12 +486,12 @@ export default function DashboardScreen({
                       const nextPoint = smoothPoints[i + 1];
                       const length = Math.sqrt(
                         (nextPoint.x - point.x) ** 2 +
-                          (nextPoint.y - point.y) ** 2
+                          (nextPoint.y - point.y) ** 2,
                       );
                       const angle =
                         Math.atan2(
                           nextPoint.y - point.y,
-                          nextPoint.x - point.x
+                          nextPoint.x - point.x,
                         ) *
                         (180 / Math.PI);
 
@@ -550,7 +550,10 @@ export default function DashboardScreen({
         </View>
 
         {/* Morning Journal Card */}
-        <View style={styles.morningJournalCard}>
+        <TouchableOpacity
+          style={styles.morningJournalCard}
+          onPress={() => router.push("/journal")}
+        >
           <View style={styles.journalIconContainer}>
             <Image
               source={require("../assets/images/journal_icon_main.png")}
@@ -567,7 +570,7 @@ export default function DashboardScreen({
             style={styles.journalArrow as any}
             resizeMode="contain"
           />
-        </View>
+        </TouchableOpacity>
 
         {/* Quick Actions Header */}
         <View style={styles.quickActionsHeader}>
@@ -604,7 +607,7 @@ export default function DashboardScreen({
                 style={styles.actionButton}
                 onPress={() => {
                   if (router) {
-                    router.push("/mood-bar");
+                    router.push("/home/mood-bar");
                   }
                 }}
               >
@@ -659,13 +662,6 @@ export default function DashboardScreen({
         {/* Bottom padding for taskbar */}
         <View style={styles.bottomPadding} />
       </ScrollView>
-
-      {/* Fixed TaskBar */}
-      {!showMeditationModal && !showMeditationPlayer && (
-        <View style={styles.taskBarContainer}>
-          <TaskBar activeTab={activeTab} onTabPress={handleTabPress} />
-        </View>
-      )}
     </View>
   );
 }
@@ -699,7 +695,7 @@ const styles = StyleSheet.create({
   } as ViewStyle,
 
   todayHeader: {
-    marginTop: 123,
+    marginTop: 100,
     marginLeft: 29,
     width: 130,
     height: 60,
