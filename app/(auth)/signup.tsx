@@ -21,7 +21,6 @@ export default function SignUp() {
       password,
       confirmPassword,
     });
-    signup(email, password);
   };
 
   const handleLogin = () => {
@@ -32,7 +31,8 @@ export default function SignUp() {
     console.log("Terms and Conditions pressed");
   };
 
-  const handleVerificationComplete = () => {
+  const handleVerificationComplete = (email: string, password: string) => {
+    signup(email, password);
     router.replace("/goals");
   };
 

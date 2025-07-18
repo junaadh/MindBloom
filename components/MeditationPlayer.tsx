@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -15,7 +15,7 @@ import Animated, {
   withSpring,
   useAnimatedStyle,
 } from "react-native-reanimated";
-import { useFocusEffect, useNavigation } from "expo-router";
+import { Audio } from "expo-av";
 
 interface MeditationPlayerProps {
   onBack?: () => void;
@@ -47,6 +47,69 @@ export default function MeditationPlayer({
   );
   const [phaseSeconds, setPhaseSeconds] = React.useState(4); // inhale starts at 4s
   const [isPaused, setIsPaused] = React.useState(false);
+
+  const soundRef = useRef<Audio.Sound | null>(null);
+
+  useEffect(() => {
+    const loadAndPlaySound = async () => {
+      const { sound } = await Audio.Sound.createAsync(
+        require("../assets/audio/ocean.mp3"),
+        { shouldPlay: true, isLooping: true },
+      );
+      soundRef.current = sound;
+    };
+
+    loadAndPlaySound();
+
+    return () => {
+      // Cleanup on unmount
+      if (soundRef.current) {
+        soundRef.current.unloadAsync();
+      }
+    };
+  }, []);
+
+  const handlePauseResume = async () => {
+    if (!soundRef.current) return;
+
+    if (isPaused) {
+      await soundRef.current.playAsync();
+      setIsPaused(false);
+    } else {
+      await soundRef.current.pauseAsync();
+      setIsPaused(true);
+    }
+  };
+
+  const handleReplay = async () => {
+    if (!soundRef.current) return;
+
+    await soundRef.current.setPositionAsync(0);
+    await soundRef.current.playAsync();
+    setTotalSeconds(minutes * 60);
+    setPhase("inhale");
+    setPhaseSeconds(4);
+    setIsPaused(false);
+    if (onReplay) onReplay();
+  };
+
+  const handleStop = async () => {
+    if (!soundRef.current) return;
+
+    await soundRef.current.stopAsync();
+    setTotalSeconds(minutes * 60);
+    setPhase("inhale");
+    setPhaseSeconds(4);
+    setIsPaused(false);
+    if (onStop) onStop();
+    if (onBack) onBack();
+  };
+
+  React.useEffect(() => {
+    if (totalSeconds <= 0 && soundRef.current) {
+      soundRef.current.stopAsync();
+    }
+  }, [totalSeconds]);
 
   // Animated logo logic (copied from MoodBarScreen)
   const pulseAnimation = useSharedValue(1);
@@ -162,6 +225,7 @@ export default function MeditationPlayer({
             setPhase("inhale");
             setPhaseSeconds(20);
             setIsPaused(false);
+            handleReplay();
             if (onReplay) onReplay();
           }}
         >
@@ -172,7 +236,10 @@ export default function MeditationPlayer({
         {/* Pause/Play */}
         <TouchableOpacity
           style={styles.controlButton}
-          onPress={() => setIsPaused((prev) => !prev)}
+          onPress={() => {
+            handlePauseResume();
+            setIsPaused((prev) => !prev);
+          }}
         >
           <View style={[styles.iconCircle, styles.pauseCircle]}>
             <Ionicons
@@ -190,6 +257,7 @@ export default function MeditationPlayer({
             setPhase("inhale");
             setPhaseSeconds(20);
             setIsPaused(false);
+            handleStop();
             if (onStop) onStop();
             if (onBack) onBack();
           }}

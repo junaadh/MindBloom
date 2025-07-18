@@ -30,7 +30,7 @@ interface SignUpScreenProps {
   ) => void;
   onLogin?: () => void;
   onTermsAndConditions?: () => void;
-  onVerificationComplete?: () => void;
+  onVerificationComplete?: (email: string, password: string) => void;
 }
 
 export default function SignUpScreen({
@@ -104,7 +104,7 @@ export default function SignUpScreen({
   const handleVerificationComplete = () => {
     setShowVerificationModal(false);
     if (onVerificationComplete) {
-      onVerificationComplete();
+      onVerificationComplete(email, password);
     }
   };
 

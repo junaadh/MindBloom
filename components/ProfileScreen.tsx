@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -9,30 +9,28 @@ import {
   SafeAreaView,
   Platform,
 } from "react-native";
-import { SvgUri } from "react-native-svg";
 import { useSession } from "@/session/ctx";
 import Toggle from "./toggle";
+import DeleteAccountModal from "./DeleteAccountModal";
 import { Ionicons } from "@expo/vector-icons";
-
-// Asset imports (ensure these files exist in assets/images/ProfileScreen)
-// import avatar = require("../assets/images/ProfileScreen/profile_avatar.png");
-
-// For SVGs, use react-native-svg-transformer (Expo supports this out of the box)
-// import languageArrow from "../assets/images/ProfileScreen/language_arrow.svg";
-// import explainabilityArrow from "../assets/images/ProfileScreen/explainability_arrow.svg";
-// import notificationsToggle from "../assets/images/ProfileScreen/notifications_toggle.svg";
 
 const FONT_FAMILY = Platform.OS === "ios" ? "SF Pro" : undefined;
 
-interface ProfileScreenProps {
-  router?: any;
-}
+interface ProfileScreenProps {}
 
-const ProfileScreen: React.FC = ({ router }: ProfileScreenProps) => {
+const ProfileScreen: React.FC = ({}: ProfileScreenProps) => {
   const { logout } = useSession();
+  const [deleteConfirmation, setDeleteConfirmation] = useState(false);
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <DeleteAccountModal
+        visible={deleteConfirmation}
+        onClose={() => setDeleteConfirmation(false)}
+        onCancelDelete={() => setDeleteConfirmation(false)}
+        onDelete={() => logout()}
+      />
+
       <ScrollView contentContainerStyle={styles.container}>
         {/* Account Section */}
         <Text style={styles.accountTitle}>Account</Text>
@@ -104,7 +102,10 @@ const ProfileScreen: React.FC = ({ router }: ProfileScreenProps) => {
         </TouchableOpacity>
 
         {/* Delete Account Button */}
-        <TouchableOpacity style={styles.deleteButton}>
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => setDeleteConfirmation(true)}
+        >
           <Text style={styles.deleteText}>Delete Account</Text>
         </TouchableOpacity>
       </ScrollView>

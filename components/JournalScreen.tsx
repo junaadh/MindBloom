@@ -1,40 +1,69 @@
 import { BlurView } from "expo-blur";
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   SafeAreaView,
-  Dimensions,
   TouchableOpacity,
 } from "react-native";
+import JournalEntryScreen from "./JournalEntryScreen";
+import AddJournalEntryModal from "./AddJournalEntryModal";
 
-const JOURNAL_ENTRIES = [
+interface JournalEntry {
+  id: string;
+  date: string;
+  day: string;
+  extendedDate: string;
+  time: string;
+  mood: string;
+  content: string;
+  icon: string;
+  summary: string;
+  detailed: string;
+}
+
+const JOURNAL_ENTRIES: JournalEntry[] = [
   {
     id: "today-1",
     date: "Today",
+    day: "Thursday",
+    extendedDate: "July 17, 2025",
     time: "10:32 AM",
     mood: "Grateful",
     content: "I’m feeling grateful for the great things in life today.",
     icon: "📝",
+    summary: "Positive",
+    detailed:
+      "I’m feeling grateful for the great things in life today. It's important to pause and appreciate what I have.",
   },
   {
     id: "yesterday-1",
     date: "Yesterday",
+    day: "Wednesday",
+    extendedDate: "July 16, 2025",
     time: "20:45 PM",
     mood: "Celebrating a small victory",
     content:
       "I presented a business pitch in front of a huge crowd. Everything went well.",
     icon: "🎉",
+    summary: "Confident",
+    detailed:
+      "I presented a business pitch in front of a huge crowd. Everything went well. I was nervous but pushed through and I'm proud of myself.",
   },
   {
     id: "yesterday-2",
     date: "Yesterday",
+    day: "Wednesday",
+    extendedDate: "July 16, 2025",
     time: "16:15 PM",
     mood: "Energized",
     content: "I had a great workout and feeling energized.",
     icon: "💪",
+    summary: "Fulfilled",
+    detailed:
+      "I had a great workout and feeling energized. It reminded me how movement clears my mind and fuels my motivation.",
   },
 ];
 
@@ -50,8 +79,53 @@ const groupEntriesByDate = (entries: typeof JOURNAL_ENTRIES) => {
 const groupedEntries = groupEntriesByDate(JOURNAL_ENTRIES);
 
 const JournalScreen: React.FC = () => {
+  const [showEntry, setShowEntry] = useState<JournalEntry | null>(null);
+
+  const [showAddEntryModal, setShowAddEntryModal] = useState(false);
+
   return (
     <SafeAreaView style={styles.safe}>
+      <AddJournalEntryModal
+        visible={showAddEntryModal}
+        onClose={() => setShowAddEntryModal(false)}
+        onSave={() => setShowAddEntryModal(false)}
+        onDiscard={() => setShowAddEntryModal}
+      />
+
+      {showEntry && (
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 100,
+            backgroundColor: "rgba(0,0,0,0.4)", // add a dimmed background
+            justifyContent: "center",
+          }}
+        >
+          <TouchableOpacity
+            onPress={() => setShowEntry(null)}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+            }}
+          />
+          <JournalEntryScreen
+            day={showEntry.day}
+            date={showEntry.extendedDate}
+            time={showEntry.time}
+            mood={showEntry.mood}
+            summary={showEntry.summary}
+            detailed={showEntry.detailed}
+            onBack={() => setShowEntry(null)}
+          />
+        </View>
+      )}
       <View style={styles.container}>
         <Text style={styles.header}>Journal</Text>
         <ScrollView
@@ -64,7 +138,10 @@ const JournalScreen: React.FC = () => {
               <Text style={styles.sectionTitle}>{date}</Text>
               {entries.map((entry) => (
                 <View style={styles.cardRow} key={entry.id}>
-                  <View style={styles.card}>
+                  <TouchableOpacity
+                    style={styles.card}
+                    onPress={() => setShowEntry(entry)}
+                  >
                     <View style={styles.cardIconWrap}>
                       <Text style={styles.cardIcon}>{entry.icon}</Text>
                     </View>
@@ -75,15 +152,17 @@ const JournalScreen: React.FC = () => {
                       </View>
                       <Text style={styles.cardText}>{entry.content}</Text>
                     </View>
-                  </View>
+                  </TouchableOpacity>
                 </View>
               ))}
             </View>
           ))}
         </ScrollView>
       </View>
-
-      <TouchableOpacity style={styles.newEntryContainer}>
+      <TouchableOpacity
+        style={styles.newEntryContainer}
+        onPress={() => setShowAddEntryModal(true)}
+      >
         <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
         <Text style={styles.newEntryText}>+</Text>
       </TouchableOpacity>
@@ -205,8 +284,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 100,
-    backgroundColor: "rgba(0,0,0,0.3)",
     overflow: "hidden",
+    shadowColor: "#ffffff",
+    shadowOffset: { width: 2, height: 1 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 4,
   },
   newEntryText: {
     fontSize: 30,
